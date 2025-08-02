@@ -4,13 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlackPiratex(Sudip) 's Guestbook</title>
-    <!-- Using Pico.css for styling -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <!-- Minimal, embedded CSS -->
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --muted-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --success-bg: #d1e7dd;
+            --success-color: #0f5132;
+            --error-bg: #f8d7da;
+            --error-color: #842029;
+            --border-radius: 0.5rem;
+            --box-shadow: 0 2px 4px rgba(0,0,0,0.075);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 1rem;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        main.container {
+            max-width: 720px;
+            margin: 1rem auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        header h1 {
+            margin-bottom: 0.5rem;
+        }
+        article {
+            background-color: var(--card-background);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        input[type="text"],
+        input[type="url"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            box-sizing: border-box; /* Important for consistent sizing */
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            background-color: var(--muted-text-color);
+            cursor: not-allowed;
+        }
+        .alert {
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+        .alert-success {
+            background-color: var(--success-bg);
+            color: var(--success-color);
+        }
+        .alert-error {
+            background-color: var(--error-bg);
+            color: var(--error-color);
+        }
+        #guestbook-entries-container article {
+            margin-top: 1rem;
+        }
+        #guestbook-entries-container header {
+            display: flex;
+            align-items: baseline;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+        }
+        #guestbook-entries-container footer {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--muted-text-color);
+            margin-top: 1rem;
+        }
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
     <main class="container">
-        <header class="text-center" style="text-align: center; margin-bottom: 2rem;">
+        <header>
             <h1>BlackPiratex(Sudip) 's Guestbook</h1>
             <p>Sign my guestbook xx</p>
         </header>
@@ -32,7 +146,6 @@
                 <label for="website">Your Website (Optional):</label>
                 <input type="url" id="website" name="website" placeholder="https://example.com">
 
-                <!-- Bot Verification -->
                 <label for="verification">
                     Bot Verification: <span id="math-problem" style="font-weight: bold;"></span>
                 </label>
@@ -40,10 +153,10 @@
                 
                 <button type="submit" id="submit-button">Sign Guestbook</button>
             </form>
-            <div id="success-message" hidden role="alert" style="background-color: #d4edda; color: #155724; padding: 1rem; margin-top: 1rem; border-radius: 0.25rem;">
+            <div id="success-message" class="alert alert-success" hidden role="alert">
                 <strong>Thank you!</strong> Your message has been submitted.
             </div>
-             <div id="error-message" hidden role="alert" style="background-color: #f8d7da; color: #721c24; padding: 1rem; margin-top: 1rem; border-radius: 0.25rem;">
+             <div id="error-message" class="alert alert-error" hidden role="alert">
                 <strong id="error-text"></strong>
             </div>
         </article>
@@ -52,7 +165,7 @@
         <section id="guestbook-entries-container" style="margin-top: 3rem;">
             <h2 style="text-align: center;">Entries</h2>
             <div id="loading" style="text-align: center;">
-                <p><progress></progress><br/>Loading guestbook entries...</p>
+                <p>Loading guestbook entries...</p>
             </div>
             <!-- Entries will be dynamically inserted here -->
         </section>
@@ -104,8 +217,6 @@
                     nameElement.textContent = submission.name || 'Anonymous';
                     header.appendChild(nameElement);
 
-                    // --- MODIFIED SECTION START ---
-                    // If a website is submitted, create a clickable link next to the name
                     if (submission.website) {
                         const websiteElement = document.createElement('a');
                         let url = submission.website;
@@ -113,22 +224,17 @@
                             url = 'https://' + url;
                         }
                         websiteElement.href = url;
-                        // Display the actual submitted URL as the link text
                         websiteElement.textContent = `(${submission.website})`;
                         websiteElement.target = '_blank';
                         websiteElement.rel = 'noopener noreferrer';
-                        websiteElement.style.marginLeft = '0.5rem';
                         websiteElement.style.fontSize = '0.9em';
                         header.appendChild(websiteElement);
                     }
-                    // --- MODIFIED SECTION END ---
 
                     const messageElement = document.createElement('p');
                     messageElement.textContent = submission.message || '';
                     
                     const footer = document.createElement('footer');
-                    footer.style.textAlign = 'right';
-                    footer.style.fontSize = '0.8em';
                     footer.textContent = new Date(submission.date).toLocaleString();
 
                     entryArticle.appendChild(header);
@@ -139,7 +245,7 @@
 
             } catch (error) {
                 console.error('Error fetching guestbook entries:', error);
-                loadingIndicator.innerHTML = `<p style="color: #721c24;">Could not load guestbook entries. This can happen if the site hasn't been configured yet. Please check the setup instructions.</p>`;
+                loadingIndicator.innerHTML = `<p style="color: var(--error-color);">Could not load guestbook entries. This can happen if the site hasn't been configured yet. Please check the setup instructions.</p>`;
             }
         };
 
@@ -159,8 +265,8 @@
             }
 
             const formData = new FormData(guestbookForm);
-            submitButton.setAttribute('aria-busy', 'true');
             submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
 
             try {
                 const response = await fetch('/', {
@@ -182,8 +288,8 @@
                 errorText.textContent = 'There was an error submitting your message. Please try again.';
                 errorMessage.hidden = false;
             } finally {
-                submitButton.setAttribute('aria-busy', 'false');
                 submitButton.disabled = false;
+                submitButton.textContent = 'Sign Guestbook';
             }
         });
 
