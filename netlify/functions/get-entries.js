@@ -1,5 +1,5 @@
-// This function runs on Netlify's servers, not in the browser.hiiii
-// It uses the built-in 'fetch' command, so no other files are needed. trigger deploy
+// This function runs on Netlify's servers, not in the browser.
+// It uses the built-in 'fetch' command, so no other files are needed.
 
 export async function handler(event, context) {
     // Get the secret environment variables you set in the Netlify UI.
@@ -33,10 +33,12 @@ export async function handler(event, context) {
 
         const submissions = await response.json();
 
-        // Send only the necessary data to the frontend.
+        // --- THIS IS THE UPDATED PART ---
+        // We now explicitly look for 'submission.data.website' and include it.
         const cleanedSubmissions = submissions.map(submission => ({
             name: submission.data.name,
             message: submission.data.message,
+            website: submission.data.website, // This line is crucial
             date: submission.created_at,
         }));
 
