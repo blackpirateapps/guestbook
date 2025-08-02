@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Secure Guestbook</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-3xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">My Secure Guestbook</h1>
+            <p class="text-lg text-gray-600 mt-2">Leave a message for everyone to see!</p>
+        </header>
+
+        <!-- Guestbook Form -->
+        <div class="bg-white p-8 rounded-lg shadow-lg mb-8">
+            <form id="guestbook-form" name="guestbook" netlify netlify-honeypot="bot-field">
+                <p class="hidden">
+                    <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
+                </p>
+                <input type="hidden" name="form-name" value="guestbook">
+
+                <div class="mb-6">
+                    <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Your Name:</label>
+                    <input type="text" id="name" name="name" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required placeholder="Jane Doe">
+                </div>
+                <div class="mb-6">
+                    <label for="message" class="block text-gray-700 text-sm font-bold mb-2">Your Message:</label>
+                    <textarea id="message" name="message" rows="4" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required placeholder="Hello world!"></textarea>
+                </div>
+                <div class="flex items-center justify-end">
+                    <button type="submit" id="submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out">
+                        Sign Guestbook
+                    </button>
+                </div>
+            </form>
+            <div id="success-message" class="hidden mt-4 text-center bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Thank you!</strong>
+                <span class="block sm:inline">Your message has been submitted.</span>
+            </div>
+        </div>
+
+        <!-- Guestbook Entries -->
+        <div id="guestbook-entries-container" class="space-y-6">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Entries</h2>
+            <div id="loading" class="text-center">
+                <p>Loading guestbook entries...</p>
+            </div>
+            <!-- Entries will be dynamically inserted here -->
+        </div>
+
+    </div>
+
+    <script>
+        const guestbookEntriesContainer = document.getElementById('guestbook-entries-container');
+        const loadingIndicator = document.getElementById('loading');
+        const guestbookForm = document.getElementById('guestbook-form');
+        const successMessage = document.getElementById('success-message');
+        const submitButton = document.getElementById('submit-button');
+
+        /**
+         * Fetches guestbook submissions from our secure Netlify Function.
+         */
+        const fetchGuestbookEntries = async () => {
+            loadingIndicator.style.display = 'block';
+            // Clear existing entries to prevent duplication on refresh
+            const existingEntries = guestbookEntriesContainer.querySelectorAll('.guestbook-entry');
+            existingEntries.forEach(e => e.remove());
+
+            try {
+                // Call our own serverless function, not the public Netlify API
+                const response = await fetch('/.netlify/functions/get-entries');
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Function Error: ${response.statusText}`);
+                }
+
+                const submissions = await response.json();
+
+                if (submissions.length === 0) {
+                    loadingIndicator.innerHTML = '<p>No entries yet. Be the first to sign!</p>';
+                } else {
+                    loadingIndicator.style.display = 'none';
+                }
+
+                submissions.forEach(submission => {
+                    const entryElement = document.createElement('div');
+                    entryElement.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'guestbook-entry');
+
+                    const nameElement = document.createElement('p');
+                    nameElement.classList.add('font-bold', 'text-lg', 'text-blue-600');
+                    nameElement.textContent = submission.name || 'Anonymous';
+
+                    const messageElement = document.createElement('p');
+                    messageElement.classList.add('text-gray-700', 'mt-2');
+                    messageElement.textContent = submission.message || '';
+                    
+                    const dateElement = document.createElement('p');
+                    dateElement.classList.add('text-xs', 'text-gray-500', 'mt-4', 'text-right');
+                    dateElement.textContent = new Date(submission.date).toLocaleString();
+
+                    entryElement.appendChild(nameElement);
+                    entryElement.appendChild(messageElement);
+                    entryElement.appendChild(dateElement);
+
+                    guestbookEntriesContainer.appendChild(entryElement);
+                });
+
+            } catch (error) {
+                console.error('Error fetching guestbook entries:', error);
+                loadingIndicator.innerHTML = `<p class="text-red-500">Could not load guestbook entries. This can happen if the site hasn't been configured yet. Please check the setup instructions.</p>`;
+            }
+        };
+
+        /**
+         * Handles the AJAX form submission.
+         */
+        guestbookForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(guestbookForm);
+            const originalButtonText = submitButton.textContent;
+            submitButton.textContent = 'Submitting...';
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(formData).toString()
+                });
+
+                if (response.ok) {
+                    successMessage.classList.remove('hidden');
+                    setTimeout(() => successMessage.classList.add('hidden'), 4000);
+                    
+                    guestbookForm.reset();
+                    // Add a small delay to allow Netlify's API to update before we fetch again
+                    setTimeout(fetchGuestbookEntries, 1000);
+                } else {
+                     throw new Error('Form submission failed.');
+                }
+
+            } catch (error) {
+                console.error('Form submission error:', error);
+                alert('There was an error submitting your message. Please try again.');
+            } finally {
+                submitButton.textContent = originalButtonText;
+                submitButton.disabled = false;
+            }
+        });
+
+        // Initial fetch of guestbook entries when the page loads
+        window.onload = fetchGuestbookEntries;
+    </script>
+</body>
+</html>
