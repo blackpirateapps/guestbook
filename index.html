@@ -17,8 +17,8 @@
     <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-3xl">
 
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900">My Secure Guestbook</h1>
-            <p class="text-lg text-gray-600 mt-2">Leave a message for everyone to see!</p>
+            <h1 class="text-4xl font-bold text-gray-900">BlackPiratex(Sudip) 's Guestbook</h1>
+            <p class="text-lg text-gray-600 mt-2">Sign my guestbook xx</p>
         </header>
 
         <!-- Guestbook Form -->
@@ -119,9 +119,33 @@
                     const entryElement = document.createElement('div');
                     entryElement.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'guestbook-entry');
 
+                    // --- MODIFIED SECTION START ---
+                    // Create a header container for name and website
+                    const headerElement = document.createElement('div');
+                    headerElement.classList.add('flex', 'items-baseline', 'space-x-3');
+
                     const nameElement = document.createElement('p');
                     nameElement.classList.add('font-bold', 'text-lg', 'text-blue-600');
                     nameElement.textContent = submission.name || 'Anonymous';
+                    headerElement.appendChild(nameElement);
+
+                    // If a website is submitted, create a clickable link next to the name
+                    if (submission.website) {
+                        const websiteElement = document.createElement('a');
+                        let url = submission.website;
+                        if (!/^https?:\/\//i.test(url)) {
+                            url = 'https://' + url;
+                        }
+                        websiteElement.href = url;
+                        websiteElement.textContent = 'Website'; // Simple text for the link
+                        websiteElement.target = '_blank';
+                        websiteElement.rel = 'noopener noreferrer';
+                        websiteElement.classList.add('text-sm', 'font-medium', 'text-indigo-600', 'hover:underline');
+                        headerElement.appendChild(websiteElement);
+                    }
+
+                    entryElement.appendChild(headerElement);
+                    // --- MODIFIED SECTION END ---
 
                     const messageElement = document.createElement('p');
                     messageElement.classList.add('text-gray-700', 'mt-2');
@@ -131,24 +155,7 @@
                     dateElement.classList.add('text-xs', 'text-gray-500', 'mt-4', 'text-right');
                     dateElement.textContent = new Date(submission.date).toLocaleString();
 
-                    entryElement.appendChild(nameElement);
                     entryElement.appendChild(messageElement);
-
-                    if (submission.website) {
-                        const websiteElement = document.createElement('a');
-                        // Ensure the URL has a protocol
-                        let url = submission.website;
-                        if (!/^https?:\/\//i.test(url)) {
-                            url = 'https://' + url;
-                        }
-                        websiteElement.href = url;
-                        websiteElement.textContent = submission.website;
-                        websiteElement.target = '_blank';
-                        websiteElement.rel = 'noopener noreferrer';
-                        websiteElement.classList.add('text-sm', 'text-indigo-600', 'hover:underline', 'mt-3', 'block', 'truncate');
-                        entryElement.appendChild(websiteElement);
-                    }
-
                     entryElement.appendChild(dateElement);
                     guestbookEntriesContainer.appendChild(entryElement);
                 });
@@ -162,18 +169,16 @@
         guestbookForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             
-            // Hide previous messages
             successMessage.classList.add('hidden');
             errorMessage.classList.add('hidden');
 
-            // --- Verification Step ---
             const userAnswer = parseInt(document.getElementById('verification').value, 10);
             if (userAnswer !== correctAnswer) {
                 errorText.textContent = 'Incorrect answer to the math problem. Please try again.';
                 errorMessage.classList.remove('hidden');
-                generateMathProblem(); // Ask a new question
+                generateMathProblem();
                 document.getElementById('verification').value = '';
-                return; // Stop the submission
+                return;
             }
 
             const formData = new FormData(guestbookForm);
@@ -191,8 +196,8 @@
                 if (response.ok) {
                     successMessage.classList.remove('hidden');
                     guestbookForm.reset();
-                    generateMathProblem(); // Generate a new problem for the next user
-                    setTimeout(fetchGuestbookEntries, 1000); // Refetch entries after a short delay
+                    generateMathProblem();
+                    setTimeout(fetchGuestbookEntries, 1000);
                 } else {
                      throw new Error('Form submission failed.');
                 }
