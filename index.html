@@ -37,6 +37,20 @@
                     <label for="message" class="block text-gray-700 text-sm font-bold mb-2">Your Message:</label>
                     <textarea id="message" name="message" rows="4" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required placeholder="Hello world!"></textarea>
                 </div>
+                <div class="mb-6">
+                    <label for="website" class="block text-gray-700 text-sm font-bold mb-2">Your Website (Optional):</label>
+                    <input type="url" id="website" name="website" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="https://example.com">
+                </div>
+
+                <!-- Bot Verification -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-md">
+                     <label for="verification" class="block text-gray-700 text-sm font-bold mb-2">Bot Verification:</label>
+                     <div class="flex items-center">
+                        <span id="math-problem" class="mr-3 text-gray-800 font-mono"></span>
+                        <input type="number" id="verification" name="verification" class="shadow-sm appearance-none border rounded w-24 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required placeholder="?">
+                     </div>
+                </div>
+
                 <div class="flex items-center justify-end">
                     <button type="submit" id="submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out">
                         Sign Guestbook
@@ -46,6 +60,10 @@
             <div id="success-message" class="hidden mt-4 text-center bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
                 <strong class="font-bold">Thank you!</strong>
                 <span class="block sm:inline">Your message has been submitted.</span>
+            </div>
+             <div id="error-message" class="hidden mt-4 text-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline" id="error-text"></span>
             </div>
         </div>
 
@@ -65,7 +83,18 @@
         const loadingIndicator = document.getElementById('loading');
         const guestbookForm = document.getElementById('guestbook-form');
         const successMessage = document.getElementById('success-message');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
         const submitButton = document.getElementById('submit-button');
+
+        let num1, num2, correctAnswer;
+
+        const generateMathProblem = () => {
+            num1 = Math.floor(Math.random() * 10) + 1;
+            num2 = Math.floor(Math.random() * 10) + 1;
+            correctAnswer = num1 + num2;
+            document.getElementById('math-problem').textContent = `What is ${num1} + ${num2}?`;
+        };
 
         const fetchGuestbookEntries = async () => {
             loadingIndicator.style.display = 'block';
@@ -104,8 +133,23 @@
 
                     entryElement.appendChild(nameElement);
                     entryElement.appendChild(messageElement);
-                    entryElement.appendChild(dateElement);
 
+                    if (submission.website) {
+                        const websiteElement = document.createElement('a');
+                        // Ensure the URL has a protocol
+                        let url = submission.website;
+                        if (!/^https?:\/\//i.test(url)) {
+                            url = 'https://' + url;
+                        }
+                        websiteElement.href = url;
+                        websiteElement.textContent = submission.website;
+                        websiteElement.target = '_blank';
+                        websiteElement.rel = 'noopener noreferrer';
+                        websiteElement.classList.add('text-sm', 'text-indigo-600', 'hover:underline', 'mt-3', 'block', 'truncate');
+                        entryElement.appendChild(websiteElement);
+                    }
+
+                    entryElement.appendChild(dateElement);
                     guestbookEntriesContainer.appendChild(entryElement);
                 });
 
@@ -117,6 +161,21 @@
 
         guestbookForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            
+            // Hide previous messages
+            successMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            // --- Verification Step ---
+            const userAnswer = parseInt(document.getElementById('verification').value, 10);
+            if (userAnswer !== correctAnswer) {
+                errorText.textContent = 'Incorrect answer to the math problem. Please try again.';
+                errorMessage.classList.remove('hidden');
+                generateMathProblem(); // Ask a new question
+                document.getElementById('verification').value = '';
+                return; // Stop the submission
+            }
+
             const formData = new FormData(guestbookForm);
             const originalButtonText = submitButton.textContent;
             submitButton.textContent = 'Submitting...';
@@ -131,22 +190,26 @@
 
                 if (response.ok) {
                     successMessage.classList.remove('hidden');
-                    setTimeout(() => successMessage.classList.add('hidden'), 4000);
                     guestbookForm.reset();
-                    setTimeout(fetchGuestbookEntries, 1000);
+                    generateMathProblem(); // Generate a new problem for the next user
+                    setTimeout(fetchGuestbookEntries, 1000); // Refetch entries after a short delay
                 } else {
                      throw new Error('Form submission failed.');
                 }
             } catch (error) {
                 console.error('Form submission error:', error);
-                alert('There was an error submitting your message. Please try again.');
+                errorText.textContent = 'There was an error submitting your message. Please try again.';
+                errorMessage.classList.remove('hidden');
             } finally {
                 submitButton.textContent = originalButtonText;
                 submitButton.disabled = false;
             }
         });
 
-        window.onload = fetchGuestbookEntries;
+        window.onload = () => {
+            generateMathProblem();
+            fetchGuestbookEntries();
+        };
     </script>
 </body>
 </html>
