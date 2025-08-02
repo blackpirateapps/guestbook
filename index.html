@@ -3,80 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Secure Guestbook</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
+    <title>BlackPiratex(Sudip) 's Guestbook</title>
+    <!-- Using Pico.css for styling -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body>
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-3xl">
-
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900">BlackPiratex(Sudip) 's Guestbook</h1>
-            <p class="text-lg text-gray-600 mt-2">Sign my guestbook xx</p>
+    <main class="container">
+        <header class="text-center" style="text-align: center; margin-bottom: 2rem;">
+            <h1>BlackPiratex(Sudip) 's Guestbook</h1>
+            <p>Sign my guestbook xx</p>
         </header>
 
         <!-- Guestbook Form -->
-        <div class="bg-white p-8 rounded-lg shadow-lg mb-8">
+        <article>
             <form id="guestbook-form" name="guestbook" netlify netlify-honeypot="bot-field">
-                <p class="hidden">
+                <p style="display: none;">
                     <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
                 </p>
                 <input type="hidden" name="form-name" value="guestbook">
 
-                <div class="mb-6">
-                    <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Your Name:</label>
-                    <input type="text" id="name" name="name" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required placeholder="Jane Doe">
-                </div>
-                <div class="mb-6">
-                    <label for="message" class="block text-gray-700 text-sm font-bold mb-2">Your Message:</label>
-                    <textarea id="message" name="message" rows="4" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required placeholder="Hello world!"></textarea>
-                </div>
-                <div class="mb-6">
-                    <label for="website" class="block text-gray-700 text-sm font-bold mb-2">Your Website (Optional):</label>
-                    <input type="url" id="website" name="website" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="https://example.com">
-                </div>
+                <label for="name">Your Name:</label>
+                <input type="text" id="name" name="name" required placeholder="Jane Doe">
+
+                <label for="message">Your Message:</label>
+                <textarea id="message" name="message" rows="4" required placeholder="Hello world!"></textarea>
+
+                <label for="website">Your Website (Optional):</label>
+                <input type="url" id="website" name="website" placeholder="https://example.com">
 
                 <!-- Bot Verification -->
-                <div class="mb-6 bg-gray-50 p-4 rounded-md">
-                     <label for="verification" class="block text-gray-700 text-sm font-bold mb-2">Bot Verification:</label>
-                     <div class="flex items-center">
-                        <span id="math-problem" class="mr-3 text-gray-800 font-mono"></span>
-                        <input type="number" id="verification" name="verification" class="shadow-sm appearance-none border rounded w-24 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required placeholder="?">
-                     </div>
-                </div>
-
-                <div class="flex items-center justify-end">
-                    <button type="submit" id="submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out">
-                        Sign Guestbook
-                    </button>
-                </div>
+                <label for="verification">
+                    Bot Verification: <span id="math-problem" style="font-weight: bold;"></span>
+                </label>
+                <input type="number" id="verification" name="verification" required placeholder="?" style="width: 100px;">
+                
+                <button type="submit" id="submit-button">Sign Guestbook</button>
             </form>
-            <div id="success-message" class="hidden mt-4 text-center bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                <strong class="font-bold">Thank you!</strong>
-                <span class="block sm:inline">Your message has been submitted.</span>
+            <div id="success-message" hidden role="alert" style="background-color: #d4edda; color: #155724; padding: 1rem; margin-top: 1rem; border-radius: 0.25rem;">
+                <strong>Thank you!</strong> Your message has been submitted.
             </div>
-             <div id="error-message" class="hidden mt-4 text-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <strong class="font-bold">Error!</strong>
-                <span class="block sm:inline" id="error-text"></span>
+             <div id="error-message" hidden role="alert" style="background-color: #f8d7da; color: #721c24; padding: 1rem; margin-top: 1rem; border-radius: 0.25rem;">
+                <strong id="error-text"></strong>
             </div>
-        </div>
+        </article>
 
         <!-- Guestbook Entries -->
-        <div id="guestbook-entries-container" class="space-y-6">
-            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Entries</h2>
-            <div id="loading" class="text-center">
-                <p>Loading guestbook entries...</p>
+        <section id="guestbook-entries-container" style="margin-top: 3rem;">
+            <h2 style="text-align: center;">Entries</h2>
+            <div id="loading" style="text-align: center;">
+                <p><progress></progress><br/>Loading guestbook entries...</p>
             </div>
             <!-- Entries will be dynamically inserted here -->
-        </div>
+        </section>
 
-    </div>
+    </main>
 
     <script>
         const guestbookEntriesContainer = document.getElementById('guestbook-entries-container');
@@ -98,7 +79,7 @@
 
         const fetchGuestbookEntries = async () => {
             loadingIndicator.style.display = 'block';
-            const existingEntries = guestbookEntriesContainer.querySelectorAll('.guestbook-entry');
+            const existingEntries = guestbookEntriesContainer.querySelectorAll('article');
             existingEntries.forEach(e => e.remove());
 
             try {
@@ -116,19 +97,14 @@
                 }
 
                 submissions.forEach(submission => {
-                    const entryElement = document.createElement('div');
-                    entryElement.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'guestbook-entry');
+                    const entryArticle = document.createElement('article');
+                    
+                    const header = document.createElement('header');
+                    const nameElement = document.createElement('strong');
+                    nameElement.textContent = submission.name || 'Anonymous';
+                    header.appendChild(nameElement);
 
                     // --- MODIFIED SECTION START ---
-                    // Create a header container for name and website
-                    const headerElement = document.createElement('div');
-                    headerElement.classList.add('flex', 'items-baseline', 'space-x-3');
-
-                    const nameElement = document.createElement('p');
-                    nameElement.classList.add('font-bold', 'text-lg', 'text-blue-600');
-                    nameElement.textContent = submission.name || 'Anonymous';
-                    headerElement.appendChild(nameElement);
-
                     // If a website is submitted, create a clickable link next to the name
                     if (submission.website) {
                         const websiteElement = document.createElement('a');
@@ -137,53 +113,53 @@
                             url = 'https://' + url;
                         }
                         websiteElement.href = url;
-                        websiteElement.textContent = 'Website'; // Simple text for the link
+                        // Display the actual submitted URL as the link text
+                        websiteElement.textContent = `(${submission.website})`;
                         websiteElement.target = '_blank';
                         websiteElement.rel = 'noopener noreferrer';
-                        websiteElement.classList.add('text-sm', 'font-medium', 'text-indigo-600', 'hover:underline');
-                        headerElement.appendChild(websiteElement);
+                        websiteElement.style.marginLeft = '0.5rem';
+                        websiteElement.style.fontSize = '0.9em';
+                        header.appendChild(websiteElement);
                     }
-
-                    entryElement.appendChild(headerElement);
                     // --- MODIFIED SECTION END ---
 
                     const messageElement = document.createElement('p');
-                    messageElement.classList.add('text-gray-700', 'mt-2');
                     messageElement.textContent = submission.message || '';
                     
-                    const dateElement = document.createElement('p');
-                    dateElement.classList.add('text-xs', 'text-gray-500', 'mt-4', 'text-right');
-                    dateElement.textContent = new Date(submission.date).toLocaleString();
+                    const footer = document.createElement('footer');
+                    footer.style.textAlign = 'right';
+                    footer.style.fontSize = '0.8em';
+                    footer.textContent = new Date(submission.date).toLocaleString();
 
-                    entryElement.appendChild(messageElement);
-                    entryElement.appendChild(dateElement);
-                    guestbookEntriesContainer.appendChild(entryElement);
+                    entryArticle.appendChild(header);
+                    entryArticle.appendChild(messageElement);
+                    entryArticle.appendChild(footer);
+                    guestbookEntriesContainer.appendChild(entryArticle);
                 });
 
             } catch (error) {
                 console.error('Error fetching guestbook entries:', error);
-                loadingIndicator.innerHTML = `<p class="text-red-500">Could not load guestbook entries. This can happen if the site hasn't been configured yet. Please check the setup instructions.</p>`;
+                loadingIndicator.innerHTML = `<p style="color: #721c24;">Could not load guestbook entries. This can happen if the site hasn't been configured yet. Please check the setup instructions.</p>`;
             }
         };
 
         guestbookForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             
-            successMessage.classList.add('hidden');
-            errorMessage.classList.add('hidden');
+            successMessage.hidden = true;
+            errorMessage.hidden = true;
 
             const userAnswer = parseInt(document.getElementById('verification').value, 10);
             if (userAnswer !== correctAnswer) {
                 errorText.textContent = 'Incorrect answer to the math problem. Please try again.';
-                errorMessage.classList.remove('hidden');
+                errorMessage.hidden = false;
                 generateMathProblem();
                 document.getElementById('verification').value = '';
                 return;
             }
 
             const formData = new FormData(guestbookForm);
-            const originalButtonText = submitButton.textContent;
-            submitButton.textContent = 'Submitting...';
+            submitButton.setAttribute('aria-busy', 'true');
             submitButton.disabled = true;
 
             try {
@@ -194,7 +170,7 @@
                 });
 
                 if (response.ok) {
-                    successMessage.classList.remove('hidden');
+                    successMessage.hidden = false;
                     guestbookForm.reset();
                     generateMathProblem();
                     setTimeout(fetchGuestbookEntries, 1000);
@@ -204,9 +180,9 @@
             } catch (error) {
                 console.error('Form submission error:', error);
                 errorText.textContent = 'There was an error submitting your message. Please try again.';
-                errorMessage.classList.remove('hidden');
+                errorMessage.hidden = false;
             } finally {
-                submitButton.textContent = originalButtonText;
+                submitButton.setAttribute('aria-busy', 'false');
                 submitButton.disabled = false;
             }
         });
