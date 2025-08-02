@@ -1,4 +1,4 @@
-// This function runs on Netlify's servers, not in the browser.
+// This function runs on Netlify's servers, not in the browser.hiiii
 // It uses the built-in 'fetch' command, so no other files are needed.
 
 export async function handler(event, context) {
