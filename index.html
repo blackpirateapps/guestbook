@@ -67,24 +67,17 @@
         const successMessage = document.getElementById('success-message');
         const submitButton = document.getElementById('submit-button');
 
-        /**
-         * Fetches guestbook submissions from our secure Netlify Function.
-         */
         const fetchGuestbookEntries = async () => {
             loadingIndicator.style.display = 'block';
-            // Clear existing entries to prevent duplication on refresh
             const existingEntries = guestbookEntriesContainer.querySelectorAll('.guestbook-entry');
             existingEntries.forEach(e => e.remove());
 
             try {
-                // Call our own serverless function, not the public Netlify API
                 const response = await fetch('/.netlify/functions/get-entries');
-
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    const errorData = await response.json().catch(() => ({ error: 'An unknown error occurred.' }));
                     throw new Error(errorData.error || `Function Error: ${response.statusText}`);
                 }
-
                 const submissions = await response.json();
 
                 if (submissions.length === 0) {
@@ -122,12 +115,8 @@
             }
         };
 
-        /**
-         * Handles the AJAX form submission.
-         */
         guestbookForm.addEventListener('submit', async (event) => {
             event.preventDefault();
-
             const formData = new FormData(guestbookForm);
             const originalButtonText = submitButton.textContent;
             submitButton.textContent = 'Submitting...';
@@ -143,14 +132,11 @@
                 if (response.ok) {
                     successMessage.classList.remove('hidden');
                     setTimeout(() => successMessage.classList.add('hidden'), 4000);
-                    
                     guestbookForm.reset();
-                    // Add a small delay to allow Netlify's API to update before we fetch again
                     setTimeout(fetchGuestbookEntries, 1000);
                 } else {
                      throw new Error('Form submission failed.');
                 }
-
             } catch (error) {
                 console.error('Form submission error:', error);
                 alert('There was an error submitting your message. Please try again.');
@@ -160,7 +146,6 @@
             }
         });
 
-        // Initial fetch of guestbook entries when the page loads
         window.onload = fetchGuestbookEntries;
     </script>
 </body>
