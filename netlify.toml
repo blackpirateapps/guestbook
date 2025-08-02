@@ -1,0 +1,5 @@
+# This file tells Netlify where to find your serverless functions.
+# It's required for the get-entries.js function to work.
+
+[build]
+  functions = "netlify/functions"
